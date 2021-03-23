@@ -18,7 +18,7 @@ function App() {
       }
     });
 
-    return unsbuscribe;
+    return unsubscribe;
   }, []);
 
   return (
