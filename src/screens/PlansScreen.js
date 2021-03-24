@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { selectUser } from "../features/userSlice";
 import db from "../firebase";
 import "./PlansScreen.css";
+import { loadStripe } from "@stripe/stripe-js";
 
 function PlansScreen() {
   const [products, setProducts] = useState([]);
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     db.collection("products")
@@ -26,6 +30,39 @@ function PlansScreen() {
   }, []);
 
   console.log(products);
+
+  const loadCheckout = async (priceId) => {
+    const docRef = await db
+      .collection("customers")
+      .doc(user.uid)
+      .collection("checkout_sessions")
+      .add({
+        price: priceId,
+        success_url: window.location.origin,
+        cancel_url: window.location.origin,
+      });
+
+    docRef.onSnapshot(async (snap) => {
+      const { error, sessionId } = snap.data();
+
+      // Show an error to your customer and
+      // inspect your Cloud Function logs in the Firebase console.
+      if (error) {
+        alert(`An error occured: ${error.message}`);
+      }
+
+      if (sessionId) {
+        // We have a session, let's redirect to Checkout
+        // Init Stripe
+
+        const stripe = await loadStripe(
+          "pk_test_51IKOziJDojz7rBofKHY2hrP01NQZEA03jbnaT4JrZz26yazeLZBv4GoeiI5Eq0fb1IV9QWAx7KMbqVPBVc1m9rad00pzQ0TSAe"
+        );
+        stripe.redirectToCheckout({ sessionId });
+      }
+    });
+  };
+
   return (
     <div className="plansScreen">
       {Object.entries(products).map(([productId, productData]) => {
@@ -37,7 +74,12 @@ function PlansScreen() {
               <h6>{productData.description}</h6>
             </div>
 
-            <button className="">Subscribe</button>
+            <button
+              onClick={() => loadCheckout(productData.prices.priceId)}
+              className=""
+            >
+              Subscribe
+            </button>
           </div>
         );
       })}
