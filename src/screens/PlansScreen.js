@@ -123,7 +123,7 @@ function PlansScreen() {
         );
       })}
     </div>
-  );
+  )
 }
 
 export default PlansScreen;
