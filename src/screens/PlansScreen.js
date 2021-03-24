@@ -50,7 +50,7 @@ function PlansScreen() {
       if (error) {
         alert(`An error occured: ${error.message}`);
       }
-
+ 
       if (sessionId) {
         // We have a session, let's redirect to Checkout
         // Init Stripe
@@ -87,4 +87,4 @@ function PlansScreen() {
   );
 }
 
-export default PlansScreen;
+export default PlansScreen
